@@ -88,6 +88,17 @@ h1{font-size:clamp(2.2rem,6vw,3.8rem);font-weight:900;line-height:1.1}
 .dsep{font-size:.75rem;color:var(--border)}
 .dlabel{display:flex;gap:10px;margin-bottom:8px;font-size:.72rem;color:var(--muted)}
 .dlabel span{flex:1;text-align:center}
+.one-liner{background:linear-gradient(135deg,rgba(255,107,157,.1),rgba(162,155,254,.1));border:1px solid rgba(255,107,157,.25);border-radius:14px;padding:15px 20px;margin-bottom:18px;font-size:1rem;font-weight:700;text-align:center;line-height:1.55}
+.mcrd{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px}
+.mcrd-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mcrd-title{font-size:.88rem;font-weight:700}
+.mcrd-tag{font-size:.7rem;padding:3px 10px;border-radius:100px;font-weight:600}
+.mcrd-profiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pbox{background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px}
+.pwho{font-size:.68rem;color:var(--muted);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.pdim{font-size:.78rem;line-height:1.55;color:#ccc}
+.mcrd-ins{border-top:1px solid var(--border);padding-top:10px;font-size:.82rem;color:var(--muted);line-height:1.6}
+.mcrd-ins::before{content:'→ ';color:var(--pink);font-weight:800}
 #page-landing{background:radial-gradient(ellipse at 50% -10%,#1a0a2e 0%,#08080f 55%)}
 .hero-badge{display:inline-block;background:rgba(255,107,157,.13);border:1px solid rgba(255,107,157,.28);color:var(--pink);padding:5px 14px;border-radius:100px;font-size:.82rem;font-weight:600;margin-bottom:22px;letter-spacing:.04em}
 .hero-sub{color:var(--muted);font-size:1.05rem;margin:14px 0 36px;line-height:1.75}
@@ -372,6 +383,95 @@ function getTags(t1,t2,mid,sc){
   return tags;
 }
 
+// ─── MODEL INSIGHT ENGINE ───
+const DD=[
+  ['对自己要求高，需要外部认可','自信随状态浮动，顺风飞逆风缩','清楚自己的价值，不太被动摇'],
+  ['内心频道模糊，常问"我是谁"','偶尔被情绪临时换号','对自己的底线和脾气门儿清'],
+  ['以舒适安全为先，不开冲刺模式','想上进也想躺，目标感时有时无','被目标和信念推着往前走'],
+  ['感情里警报器灵敏，容易焦虑','一半信任一半试探','安全感稳固，不被风吹草动吓散'],
+  ['情感投入比较克制，心门门禁严','会投入但给自己留后手','一旦认定就情绪精力全给出去'],
+  ['容易依赖对方，温度感很重要','亲密和独立各要一点，可调节','需要自己的空间，再爱也留一块地'],
+  ['对世界有防御性滤镜，先怀疑','不天真也不阴谋论，观望是本能','相信人性和善意'],
+  ['规则能绕就绕，自由排在前面','该守时守，该变通时不死磕','秩序感强，按流程来'],
+  ['意义感偏低，容易觉得走过场','目标感半开机，偶尔有偶尔摆','做事有方向，知道自己往哪走'],
+  ['做事先考虑别翻车，避险优先','有时想赢有时只想别麻烦','被成果和推进感点燃'],
+  ['做决定前容易转很多圈','会想，但不至于死机','快速拍板，不爱回头磨叽'],
+  ['执行力和deadline是好朋友','状态好时冲，一般时摆','不落地心里像卡了根刺'],
+  ['社交比较慢热，主动出击要攒气','有人来就接，没人来不硬凑','愿意主动打开场子'],
+  ['容易把人划进内圈，温度感重','边界感看对象随时调节','边界感偏强，靠太近先退半步'],
+  ['心里有啥基本不绕，直接','真实和体面通常各留一点','真实感分层发放，不同场合不同的自己'],
+];
+
+function pdesc(dims,start){
+  return[0,1,2].map(i=>DD[start+i]?.[dims[start+i]-1]||'').filter(Boolean);
+}
+
+function chemTag(d1,d2,s){
+  const avg=([0,1,2].map(i=>Math.abs(d1[s+i]-d2[s+i])).reduce((a,b)=>a+b))/3;
+  if(avg<0.55) return{t:'高度同频',c:'#7BED9F'};
+  if(avg>=1.25) return{t:'互补型',c:'#FF6B9D'};
+  return{t:'各有节奏',c:'#70A1FF'};
+}
+
+const MIF=[
+  (a,b,t1,t2)=>{
+    if(Math.abs(a[0]-b[0])>=2) return(a[0]>b[0]?t1.cn:t2.cn)+'的清醒和稳定，自然成为另一方的锚点';
+    if(a[0]===b[0]&&a[0]>=2) return'两个都清楚自己是谁，省了大量解释成本';
+    if(a[2]===3&&b[2]===3) return'都有方向感，并肩走比跟随走更适合这对';
+    return'自我感知各有节奏，给彼此一点空间做自己会更舒服';
+  },
+  (a,b,t1,t2)=>{
+    if(a[0]===3&&b[0]===1) return t1.cn+'的稳定是'+t2.cn+'焦虑的解药，一个撑着另一个';
+    if(a[0]===1&&b[0]===3) return t2.cn+'的稳定是'+t1.cn+'焦虑的解药，一个撑着另一个';
+    if(a[1]===3&&b[1]===3) return'两边都往里全押，感情浓度极高，记得偶尔呼吸';
+    if(a[1]===1&&b[1]===1) return'双方都克制，感情建立慢，但一旦确认就是真的';
+    if(Math.abs(a[2]-b[2])>=2) return'一个要空间一个要亲近，彼此的边界需要慢慢商量';
+    return'情感节奏有差异，磨合后能找到属于这对的平衡';
+  },
+  (a,b,t1,t2)=>{
+    if(a[0]===b[0]) return'世界观大致相近，不容易因为"三观不合"翻车';
+    if(Math.abs(a[0]-b[0])>=2) return'一个相信善意一个自带防御，时间长了可能互相改变对方';
+    return'看世界的角度有差异，可以互相提供盲区，这不是坏事';
+  },
+  (a,b,t1,t2)=>{
+    if(Math.abs(a[2]-b[2])>=2) return'一个推进欲强一个靠deadline冲刺，合作时容易一个踩油门一个踩刹车';
+    if(a[0]===3&&b[0]===3) return'两个都被成果点燃，一起做事效率可以很高';
+    if(Math.abs(a[1]-b[1])>=2) return'一个快拍板一个慢决策，互补但需要给彼此耐心';
+    return'行动节奏有差异，分工后可以找到顺畅的协作方式';
+  },
+  (a,b,t1,t2)=>{
+    if(Math.abs(a[0]-b[0])>=2) return'一个主动打开场子一个慢热跟进，社交搭档的经典组合';
+    if(a[0]===b[0]&&a[0]===3) return'两个都喜欢打开场子，在一起social能量会爆棚';
+    if(a[0]===b[0]&&a[0]===1) return'两个都慢热，在一起安静但舒服，不需要强行热情';
+    return'社交风格各有特色，保持各自节奏会更自在';
+  },
+];
+
+const MNAMES=[['🧠','自我感知'],['💕','情感系统'],['🌍','世界观'],['⚡','行动力'],['🤝','社交风格']];
+
+function getOneLiner(t1,t2,mid,sc){
+  const P={
+    couple:{h:['这一对，越往后越好 🔥','恭喜，这是系统认证的良配','问就是有缘，不谈是人类的损失','按这个配置不谈恋爱是在浪费'],
+      m:['磨合期会有点久，但值了 ✨','互相嫌弃但又离不开，这不就是爱情吗','说不清楚的那种吸引力，往往是对的'],
+      l:['高难度关系，但世上最好的故事都是这样开始的','宇宙级碰撞，后续走向充满悬念 🎲','劝合不劝分——但你们的故事可以拍电影']},
+    bestie:{h:['这辈子的姐妹就该是这样的 💯','两个人加在一起等于一支无敌军队','随便在一起，关键时刻永远到场'],
+      m:['对方知道你有多能作，还没走','闹过架还继续的，才是真朋友','这种姐妹需要磨合，但磨合完了非常值'],
+      l:['高难度友情，但打过了才是铁杆','性格差很大，说不定这正是你们需要的','两个人加起来脑回路很清奇，不按套路出牌']},
+    friend:{h:['见面就聊得起来的那种朋友 ✨','不用刻意维系，感情自然在','这种朋友可遇不可求'],
+      m:['还行的朋友，约饭可以','能说话但留点距离更舒服','合适约饭，不太适合一起住'],
+      l:['走走看，说不准将来变铁杆','朋友缘分比较迂回，需要时间','现在可能还没那么熟，后续看缘分']},
+    mentor:{h:['绝佳师徒缘，双向成就 📚','一个愿意教，另一个真的学进去了','将来可能互相影响，界限会越来越模糊'],
+      m:['磨合后会有很大的进步空间','有时候学生会给老师新视角','这种师生关系需要一点耐心'],
+      l:['教学风格差异大，需要更多耐心','多年后才明白对方说的是对的','现在看不顺眼，将来可能感谢']},
+    family:{h:['这是家里最懂彼此的组合 🏠','吃饭不说话也舒服的那种','能接住对方崩溃，就是家人'],
+      m:['有小摩擦，但家人就是家人','骨子里离不开','偶尔别扭，一起长大的代价'],
+      l:['相爱相杀型，但血浓于水','沉默有时候比争吵更长','家人缘分最复杂，但也最不会散']},
+  };
+  const lv=sc>=75?'h':sc>=50?'m':'l';
+  const pool=P[mid]?.[lv]||['很有意思的组合'];
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
 // ─── STATE ───
 let S={my:null,their:null,mode:null};
 
@@ -449,27 +549,35 @@ function showResult(){
   const title=getTitle(t1,t2,mid,sc);
   const narr=getNarr(t1,t2,mid,sc);
   const tags=getTags(t1,t2,mid,sc);
+  const liner=getOneLiner(t1,t2,mid,sc);
   const mode=MODES.find(m=>m.id===mid);
   const d1=pdims(t1.p),d2=pdims(t2.p);
-  const lv=['L','M','H'];
   const col=sc>=78?'#7BED9F':sc>=55?'#70A1FF':sc>=38?'#FFA502':'#FF4757';
   const C=2*Math.PI*72;
 
-  const dimHtml=MODELS.map(([mn,start])=>{
-    const rows=[0,1,2].map(di=>{
-      const idx=start+di;
-      const v1=d1[idx],v2=d2[idx];
-      return `<div class="drow">
-        <div class="dname">${DIMS[idx]}</div>
-        <div class="dbars"><div class="dbar d${lv[v1-1]}">${lv[v1-1]}</div></div>
-        <div class="dsep">·</div>
-        <div class="dbars"><div class="dbar d${lv[v2-1]}">${lv[v2-1]}</div></div>
-      </div>`;
-    }).join('');
-    return `<div class="dsec">
-      <div class="dsec-title">${mn}</div>
-      <div class="dlabel"><span>${t1.e} ${t1.code}</span><span></span><span>${t2.e} ${t2.code}</span></div>
-      ${rows}</div>`;
+  const chemHtml=MNAMES.map(([icon,name],mi)=>{
+    const s=mi*3;
+    const a=[d1[s],d1[s+1],d1[s+2]],b=[d2[s],d2[s+1],d2[s+2]];
+    const ch=chemTag(d1,d2,s);
+    const ins=MIF[mi](a,b,t1,t2);
+    const yd=pdesc(d1,s),td=pdesc(d2,s);
+    return`<div class="mcrd">
+      <div class="mcrd-hdr">
+        <div class="mcrd-title">${icon} ${name}</div>
+        <span class="mcrd-tag" style="background:${ch.c}22;color:${ch.c};border:1px solid ${ch.c}44">${ch.t}</span>
+      </div>
+      <div class="mcrd-profiles">
+        <div class="pbox">
+          <div class="pwho">${t1.e} 你 (${t1.code})</div>
+          <div class="pdim">${yd.map(x=>`• ${x}`).join('<br>')}</div>
+        </div>
+        <div class="pbox">
+          <div class="pwho">${t2.e} TA (${t2.code})</div>
+          <div class="pdim">${td.map(x=>`• ${x}`).join('<br>')}</div>
+        </div>
+      </div>
+      <div class="mcrd-ins">${ins}</div>
+    </div>`;
   }).join('');
 
   document.getElementById('result-content').innerHTML=`
@@ -487,9 +595,10 @@ function showResult(){
       </div>
     </div>
     <div class="tags">${tags.map(t=>`<span class="tag ${t.c}">${t.t}</span>`).join('')}</div>
+    <div class="one-liner">${liner}</div>
     <div class="narr">${narr.replace(/\n/g,'<br>')}</div>
-    <div style="margin-bottom:8px;font-size:.82rem;font-weight:600;color:var(--muted)">维度对比</div>
-    ${dimHtml}`;
+    <div style="margin-bottom:8px;font-size:.82rem;font-weight:600;color:var(--muted)">五维化学分析</div>
+    ${chemHtml}`;
 
   setTimeout(()=>{
     const f=document.getElementById('sfill');
