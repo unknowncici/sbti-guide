@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBTI 配对实验室 🎭 — 测测你们合不合</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,'Microsoft YaHei',sans-serif;background:#08080f;color:#fff;min-height:100vh;overflow-x:hidden}
+:root{--pink:#FF6B9D;--green:#7BED9F;--blue:#70A1FF;--yellow:#FFA502;--purple:#A29BFE;--red:#FF4757;--card:#14141f;--border:#2a2a3e;--muted:#8888aa}
+.page{display:none;min-height:100vh;padding:32px 16px}
+.page.active{display:flex;flex-direction:column;align-items:center}
+.container{width:100%;max-width:760px}
+h1{font-size:clamp(2.2rem,6vw,3.8rem);font-weight:900;line-height:1.1}
+.grad{background:linear-gradient(135deg,var(--pink),var(--purple),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.muted{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:100px;font-size:1rem;font-weight:700;cursor:pointer;border:none;transition:.2s;text-decoration:none;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;box-shadow:0 4px 28px rgba(255,107,157,.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(255,107,157,.45)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-ghost{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.13)}
+.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.back{background:var(--card);border:1px solid var(--border);color:#fff;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;flex-shrink:0;transition:.2s}
+.back:hover{border-color:var(--pink)}
+.page-hdr{display:flex;align-items:center;gap:14px;width:100%;max-width:760px;margin-bottom:28px}
+.page-hdr-title{font-size:1.05rem;font-weight:700}
+.page-hdr-sub{font-size:.78rem;color:var(--muted);margin-top:1px}
+.steps{display:flex;gap:6px;margin-left:auto}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:.3s}
+.dot.on{background:var(--pink);width:22px;border-radius:4px}
+.dot.done{background:var(--green)}
+.search{width:100%;padding:11px 18px;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:#fff;font-size:.95rem;margin-bottom:14px;outline:none;transition:.2s;font-family:inherit}
+.search:focus{border-color:var(--pink)}
+.search::placeholder{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;max-height:400px;overflow-y:auto;padding:2px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.tcard{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center;transition:.18s;user-select:none}
+.tcard:hover{border-color:var(--pink);background:#1e1e2e}
+.tcard.sel{border-color:var(--pink);background:rgba(255,107,157,.1)}
+.tcard.sel .tcode{color:var(--pink)}
+.temi{font-size:1.7rem;display:block;margin-bottom:5px}
+.tcode{font-size:.85rem;font-weight:700;margin-bottom:2px}
+.tcn{font-size:.72rem;color:var(--muted)}
+.action{position:sticky;bottom:0;width:100%;max-width:760px;padding:14px 0;background:linear-gradient(to top,#08080f 60%,transparent);margin-top:auto}
+.preview{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 15px;display:flex;align-items:center;gap:11px;margin-bottom:18px}
+.prev-emi{font-size:1.4rem}
+.prev-name{font-size:.9rem;font-weight:700}
+.prev-sub{font-size:.75rem;color:var(--muted)}
+.prev-badge{margin-left:auto;font-size:.73rem;padding:3px 10px;background:rgba(255,107,157,.15);color:var(--pink);border-radius:100px}
+.modes{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;margin-top:8px}
+.mcard{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:18px 8px;cursor:pointer;text-align:center;transition:.18s}
+.mcard:hover{border-color:var(--purple)}
+.mcard.sel{border-color:var(--purple);background:rgba(162,155,254,.1)}
+.memi{font-size:1.9rem;display:block;margin-bottom:7px}
+.mname{font-size:.85rem;font-weight:600}
+.vsbar{display:flex;align-items:center;gap:14px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:22px}
+.vstype{flex:1;text-align:center}
+.vsemi{font-size:1.9rem;display:block}
+.vscode{font-size:1rem;font-weight:800;margin-top:2px}
+.vscn{font-size:.75rem;color:var(--muted)}
+.vsdiv{font-size:1.1rem;font-weight:900;color:var(--muted)}
+.score-wrap{position:relative;width:170px;height:170px;margin:0 auto 26px}
+.score-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-bg{fill:none;stroke:var(--border);stroke-width:10}
+.score-fg{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.4s cubic-bezier(.22,1,.36,1)}
+.score-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-num{font-size:2.6rem;font-weight:900;line-height:1}
+.score-lbl{font-size:.72rem;color:var(--muted);margin-top:3px}
+.rtitle{font-size:clamp(1.2rem,4vw,1.8rem);font-weight:900;line-height:1.3;margin-bottom:10px;text-align:center}
+.rsub{font-size:.85rem;color:var(--muted);text-align:center;margin-bottom:24px}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+.tag{padding:4px 12px;border-radius:100px;font-size:.77rem;font-weight:600}
+.tg{background:rgba(123,237,159,.14);color:var(--green);border:1px solid rgba(123,237,159,.3)}
+.tb{background:rgba(112,161,255,.14);color:var(--blue);border:1px solid rgba(112,161,255,.3)}
+.ty{background:rgba(255,165,2,.14);color:var(--yellow);border:1px solid rgba(255,165,2,.3)}
+.tr{background:rgba(255,71,87,.14);color:var(--red);border:1px solid rgba(255,71,87,.3)}
+.tp{background:rgba(255,107,157,.14);color:var(--pink);border:1px solid rgba(255,107,157,.3)}
+.narr{background:linear-gradient(135deg,rgba(255,107,157,.07),rgba(162,155,254,.07));border:1px solid rgba(255,107,157,.18);border-radius:14px;padding:18px 22px;margin-bottom:18px;font-size:.92rem;line-height:1.85}
+.dsec{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
+.dsec-title{font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em}
+.drow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.dname{font-size:.75rem;color:var(--muted);width:42px;flex-shrink:0}
+.dbars{flex:1;display:flex;gap:3px}
+.dbar{height:20px;border-radius:4px;flex:1;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700}
+.dH{background:rgba(255,107,157,.22);color:var(--pink);border:1px solid rgba(255,107,157,.38)}
+.dM{background:rgba(162,155,254,.18);color:var(--purple);border:1px solid rgba(162,155,254,.32)}
+.dL{background:rgba(136,136,170,.12);color:var(--muted);border:1px solid rgba(136,136,170,.22)}
+.dsep{font-size:.75rem;color:var(--border)}
+.dlabel{display:flex;gap:10px;margin-bottom:8px;font-size:.72rem;color:var(--muted)}
+.dlabel span{flex:1;text-align:center}
+#page-landing{background:radial-gradient(ellipse at 50% -10%,#1a0a2e 0%,#08080f 55%)}
+.hero-badge{display:inline-block;background:rgba(255,107,157,.13);border:1px solid rgba(255,107,157,.28);color:var(--pink);padding:5px 14px;border-radius:100px;font-size:.82rem;font-weight:600;margin-bottom:22px;letter-spacing:.04em}
+.hero-sub{color:var(--muted);font-size:1.05rem;margin:14px 0 36px;line-height:1.75}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;text-align:center;max-width:360px;margin:50px auto 0}
+.stat-icon{font-size:1.7rem}
+.stat-txt{font-size:.8rem;color:var(--muted);margin-top:4px}
+@media(max-width:480px){.modes{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- LANDING -->
+<div id="page-landing" class="page active">
+<div class="container" style="text-align:center;padding-top:8vh">
+  <div class="hero-badge">✨ MBTI 已经过时</div>
+  <h1 class="grad">SBTI<br>配对实验室</h1>
+  <p class="hero-sub">输入你和 TA 的人格类型<br>系统帮你算算，你们到底合不合</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="goto('my-type')">🔥 开始配对</button>
+    <a class="btn btn-ghost" href="https://sbti.fancc.de5.net" target="_blank">📝 先去测一下</a>
+  </div>
+  <div class="stats">
+    <div><div class="stat-icon">🎭</div><div class="stat-txt">27 种人格</div></div>
+    <div><div class="stat-icon">💑</div><div class="stat-txt">5 种关系模式</div></div>
+    <div><div class="stat-icon">🔬</div><div class="stat-txt">15 个维度分析</div></div>
+  </div>
+</div>
+</div>
+
+<!-- MY TYPE -->
+<div id="page-my-type" class="page">
+<div class="page-hdr">
+  <div class="back" onclick="goto('landing')">←</div>
+  <div><div class="page-hdr-title">你是哪个人格？</div><div class="page-hdr-sub">第 1 步 / 共 3 步</div></div>
+  <div class="steps"><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div>
+</div>
+<div class="container">
+  <input class="search" type="text" id="search-my" placeholder="🔍 搜索代码或名字…" oninput="renderGrid('my',this.value)">
+  <div class="grid" id="grid-my"></div>
+</div>
+<div class="action"><div class="container">
+  <button class="btn btn-primary" style="width:100%" id="btn-my" disabled onclick="goto('their-type')">下一步 →</button>
+</div></div>
+</div>
+
+<!-- THEIR TYPE -->
+<div id="page-their-type" class="page">
+<div class="page-hdr">
+  <div class="back" onclick="goto('my-type')">←</div>
+  <div><div class="page-hdr-title">TA 是哪个人格？</div><div class="page-hdr-sub">第 2 步 / 共 3 步</div></div>
+  <div class="steps"><div class="dot done"></div><div class="dot on"></div><div class="dot"></div></div>
+</div>
+<div class="container">
+  <div class="preview" id="my-preview"></div>
+  <input class="search" type="text" id="search-their" placeholder="🔍 搜索代码或名字…" oninput="renderGrid('their',this.value)">
+  <div class="grid" id="grid-their"></div>
+</div>
+<div class="action"><div class="container">
+  <button class="btn btn-primary" style="width:100%" id="btn-their" disabled onclick="goto('mode')">下一步 →</button>
+</div></div>
+</div>
+
+<!-- MODE -->
+<div id="page-mode" class="page">
+<div class="page-hdr">
+  <div class="back" onclick="goto('their-type')">←</div>
+  <div><div class="page-hdr-title">你们是什么关系？</div><div class="page-hdr-sub">第 3 步 / 共 3 步</div></div>
+  <div class="steps"><div class="dot done"></div><div class="dot done"></div><div class="dot on"></div></div>
+</div>
+<div class="container">
+  <div class="vsbar" id="vs-bar"></div>
+  <div class="modes" id="mode-grid"></div>
+</div>
+<div class="action"><div class="container">
+  <button class="btn btn-primary" style="width:100%" id="btn-mode" disabled onclick="showResult()">🔮 开始分析</button>
+</div></div>
+</div>
+
+<!-- RESULT -->
+<div id="page-result" class="page">
+<div class="page-hdr">
+  <div class="back" onclick="goto('mode')">←</div>
+  <div class="page-hdr-title">配对结果</div>
+</div>
+<div class="container" id="result-content"></div>
+<div style="width:100%;max-width:760px;padding:12px 0 48px">
+  <button class="btn btn-primary" style="width:100%" onclick="restart()">🔄 再测一对</button>
+</div>
+</div>
+
+</div>
+<script>
+const TYPES=[
+{code:'CTRL',  cn:'拿捏者', e:'🎮', p:'HHH-HMH-MHH-HHH-MHM', desc:'行走的人形任务管理器，宇宙熵增的天然反抗者。'},
+{code:'BOSS',  cn:'领导者', e:'👔', p:'HHH-HMH-MMH-HHH-LHL', desc:'手里永远拿着方向盘，哪怕油箱亮红灯。'},
+{code:'GOGO',  cn:'行者',   e:'🚀', p:'HHM-HMH-MMH-HHH-MHM', desc:'世界上只有两种状态：已完成，和即将被我完成。'},
+{code:'THIN-K',cn:'思考者', e:'🔬', p:'HHL-HMH-MLH-MHM-LHH', desc:'大脑深度思考中，已缓存 100 秒，请勿打扰。'},
+{code:'POOR',  cn:'贫困者', e:'🎯', p:'HHL-MLH-LMH-HHH-LHL', desc:'欲望断舍离，精力全灌进一个坑，看起来穷实际是矿井。'},
+{code:'OH-NO', cn:'哦不人', e:'😨', p:'HHL-LMH-LHH-HHM-LHL', desc:'看见杯子在桌沿就能预见世界末日，然后悄悄挪开它。'},
+{code:'WOC!',  cn:'握草人', e:'🙄', p:'HHL-HMH-MMH-HHM-LHH', desc:'表面系统负责卧槽，后台系统冷静分析：果然不出所料。'},
+{code:'SHIT',  cn:'愤世者', e:'💢', p:'HHL-HLH-LMM-HHM-LHH', desc:'嘴上这世界是坨屎，手上第二天早上七点准时出发。'},
+{code:'ATM-er',cn:'送钱者', e:'💳', p:'HHH-HHM-HHH-HMH-MHL', desc:'人生是一场盛大的无人喝彩单人付账秀。'},
+{code:'LOVE-R',cn:'多情者', e:'🌹', p:'MLH-LHL-HLH-MLM-MLH', desc:'情感处理器是彩虹制的，等那个陪坐旋转木马到宇宙尽头的人。'},
+{code:'MUM',   cn:'妈妈',   e:'🤱', p:'MMH-MHL-HMM-LMM-HLL', desc:'底色温柔，治愈了别人，自己的药打了折。'},
+{code:'THAN-K',cn:'感恩者', e:'🌸', p:'MHM-HMM-HHM-MMH-MHL', desc:'永不枯竭的正能量发射塔，能从霉斑里看见梵高星空。'},
+{code:'SEXY',  cn:'尤物',   e:'💋', p:'HMH-HHL-HMM-HMM-HLH', desc:'单是存在本身，就已经很像一篇华丽到过分的赋。'},
+{code:'IMFW',  cn:'废物',   e:'🌷', p:'LLH-LHL-LML-LLL-MLL', desc:'温室兰花，给一颗糖还你亮晶晶眼神。'},
+{code:'JOKE-R',cn:'小丑',   e:'🤡', p:'LLH-LHL-LML-LLL-MLM', desc:'用最大的笑声，盖住心碎的声音。'},
+{code:'FAKE',  cn:'伪人',   e:'🎭', p:'HLM-MML-MLM-MLM-HLH', desc:'面具下空得很，但正是这些面具构成了自己。'},
+{code:'MALO',  cn:'吗喽',   e:'🐒', p:'MLH-MHM-MLH-MLH-LMH', desc:'灵魂还在树上荡秋千，看见香蕉两眼放光。'},
+{code:'FUCK',  cn:'草者',   e:'🌿', p:'MLL-LHL-LLM-MLL-HLH', desc:'无法被任何除草剂杀死的人形野草，荒野最后那声狼嚎。'},
+{code:'OJBK',  cn:'无所谓人',e:'🤷',p:'MMH-MMM-HML-LMM-MML', desc:'都行。不是没主见，这是统治哲学。'},
+{code:'Dior-s',cn:'屌丝',   e:'👟', p:'MHM-MMH-MHM-HMH-LHL', desc:'第欧根尼精神传人，对消费主义最彻底的蔑视。'},
+{code:'ZZZZ',  cn:'装死者', e:'💤', p:'MHL-MLH-LML-MML-LHM', desc:'在 29 分钟截止前苏醒，交完答卷继续装死。'},
+{code:'MONK',  cn:'僧人',   e:'🧘', p:'HHL-LLH-LLM-MML-LHM', desc:'已看破红尘，个人空间是须弥山，神圣不可侵犯。'},
+{code:'IMSB',  cn:'傻者',   e:'😅', p:'LLM-LMM-LLL-LLL-MLM', desc:'内心戏比漫威宇宙所有电影加起来都长。'},
+{code:'SOLO',  cn:'孤儿',   e:'🦔', p:'LML-LLH-LHL-LML-LHM', desc:'用最硬的刺对着世界的刺猬，那是说不出口的"别离开"。'},
+{code:'DEAD',  cn:'死者',   e:'💀', p:'LLL-LLM-LML-LLL-LHM', desc:'通关了，删档重开 999 次，发现这游戏压根没意思。'},
+{code:'HHHH',  cn:'傻乐者', e:'😂', p:'MMM-MMM-MMM-MMM-MMM', desc:'脑回路过于清奇，标准人格库已全面崩溃。哈哈哈哈哈。'},
+{code:'DRUNK', cn:'酒鬼',   e:'🍶', p:'HML-LMH-HLH-MHL-HLM', desc:'在饭桌上谈笑风生，在厕所里抱着马桶忏悔人生。'},
+];
+
+const DIMS=['S1','S2','S3','E1','E2','E3','A1','A2','A3','Ac1','Ac2','Ac3','So1','So2','So3'];
+const MODELS=[['🧠 自我模型',0],['💕 情感模型',3],['🌍 态度模型',6],['⚡ 行动驱力',9],['🤝 社交模型',12]];
+const MODES=[{id:'couple',e:'💑',n:'情侣'},{id:'bestie',e:'👭',n:'闺蜜'},{id:'friend',e:'🤝',n:'朋友'},{id:'mentor',e:'📚',n:'老师'},{id:'family',e:'🏠',n:'家人'}];
+
+const W={
+  couple:[[3,'asym',.28],[4,'sim',.22],[5,'comp',.16],[0,'sim',.12],[12,'comp',.10],[6,'sim',.08],[13,'comp',.04]],
+  bestie:[[12,'sim',.26],[4,'sim',.22],[6,'sim',.20],[14,'hi',.14],[5,'comp',.10],[0,'sim',.08]],
+  friend:[[6,'sim',.22],[12,'comp',.20],[0,'sim',.16],[9,'sim',.14],[4,'comp',.14],[14,'sim',.14]],
+  mentor:[[0,'teach',.25],[9,'teach',.22],[10,'teach',.20],[3,'teach',.18],[8,'teach',.15]],
+  family:[[3,'sim',.26],[6,'sim',.24],[0,'sim',.20],[4,'sim',.16],[12,'comp',.14]],
+};
+
+function pdims(p){const m={H:3,M:2,L:1};return p.split('-').join('').split('').map(c=>m[c]||2)}
+
+function sdp(v1,v2,m){
+  const d=Math.abs(v1-v2);
+  if(m==='sim') return[100,65,25][d];
+  if(m==='comp') return[35,70,100][d];
+  if(m==='asym') return[30,65,100][d];
+  if(m==='hi') return Math.round((v1+v2-2)/4*100);
+  if(m==='teach') return v1>v2?90:v1===v2?60:28;
+  return 50;
+}
+
+function calc(t1,t2,mid){
+  const d1=pdims(t1.p),d2=pdims(t2.p);
+  let s=0,tot=0;
+  for(const[i,m,w]of W[mid]){s+=sdp(d1[i],d2[i],m)*w;tot+=w}
+  return Math.round(s/tot);
+}
+
+const ROLES={
+  'CTRL':{v:'拿捏住了',r:'被拿捏了',i:'✊'},
+  'BOSS':{v:'强势收编了',r:'被收编了',i:'📋'},
+  'GOGO':{v:'拉着冲向了',r:'被带着跑了',i:'🏃'},
+  'THIN-K':{v:'深度分析了',r:'被研究透了',i:'🔍'},
+  'POOR':{v:'激光锁定了',r:'被盯上了',i:'🎯'},
+  'OH-NO':{v:'提前预警了',r:'被担忧了',i:'⚠️'},
+  'WOC!':{v:'卧槽看穿了',r:'被看穿了',i:'👀'},
+  'SHIT':{v:'骂完就冲向了',r:'被骂醒然后上头了',i:'💢'},
+  'ATM-er':{v:'无偿支付了',r:'被全额支付了',i:'💳'},
+  'LOVE-R':{v:'爱昏了头投入了',r:'被爱淹没了',i:'🌹'},
+  'MUM':{v:'悄悄照顾了',r:'被妈妈缴械了',i:'🤱'},
+  'THAN-K':{v:'感恩地接受了',r:'被感恩光芒照到了',i:'🙏'},
+  'SEXY':{v:'天生迷倒了',r:'被尤物锁定了',i:'💋'},
+  'IMFW':{v:'亮晶晶眼神认定了',r:'被温室兰花缠住了',i:'🌷'},
+  'JOKE-R':{v:'笑着走进了',r:'被小丑暖到了',i:'🤡'},
+  'FAKE':{v:'切换面具迷住了',r:'被伪人看穿了',i:'🎭'},
+  'MALO':{v:'晃荡进了',r:'被吗喽整破防了',i:'🐒'},
+  'FUCK':{v:'野蛮生长进了',r:'被野草淹没了',i:'🌿'},
+  'OJBK':{v:'随便接受了',r:'被随便对待后上头了',i:'🤷'},
+  'Dior-s':{v:'暗中盯上了',r:'被屌丝套路了',i:'👟'},
+  'ZZZZ':{v:'截止前苏醒闯入了',r:'被装死者突然整到了',i:'💤'},
+  'MONK':{v:'看破红尘接受了',r:'被和尚收进了结界',i:'🧘'},
+  'IMSB':{v:'在心里冲向了',r:'被傻者戳中软肋了',i:'😅'},
+  'SOLO':{v:'开了长城门放进了',r:'被刺猬戳破防了',i:'🦔'},
+  'DEAD':{v:'通关后选中了',r:'被死者最后存档了',i:'💀'},
+  'HHHH':{v:'哈哈哈哈认定了',r:'被哈哈笑场了',i:'😂'},
+  'DRUNK':{v:'喝醉后闯入了',r:'被酒鬼砸场子了',i:'🍶'},
+};
+
+const NOTABLE={
+  'CTRL+IMFW+couple':'✊ 唐僧遇上了温室兰花，拿捏得死死的',
+  'IMFW+CTRL+couple':'✊ 温室兰花终于找到了愿意把温室维护好的人',
+  'BOSS+MUM+couple':'📋 铁腕大家长遇上情感输氧机，意外被缴了枪',
+  'MUM+BOSS+couple':'🤱 妈妈悄悄钻进大家长的盔甲缝里，扎根了',
+  'THIN-K+GOGO+couple':'🔬 百年大计遇上说干就干，分析完直接出发',
+  'GOGO+THIN-K+couple':'🚀 行者拉着思考者跑，跑着跑着爱上了',
+  'LOVE-R+THAN-K+couple':'🌹 两个觉得世界是美好的人，找到了彼此',
+  'SEXY+IMSB+couple':'💋 尤物一个眼神，傻者大脑原地宕机三秒',
+  'IMSB+SEXY+couple':'😅 傻者在心里冲了一百次，有一次被看见了',
+  'CTRL+CTRL+couple':'✊ 两个拿捏者互相拿捏，宇宙陷入死锁',
+  'BOSS+BOSS+couple':'📋 双BOSS大战，谁也不让谁，旁观者坐下吃瓜',
+  'DEAD+DEAD+couple':'💀 两个通关的人坐在一起，什么也没发生——又怎样',
+  'LOVE-R+LOVE-R+couple':'🌹 双恋爱脑合并，感情能量爆炸，现实不堪承受',
+  'MONK+FUCK+couple':'🧘 出家人遇上人形野草，互看不顺眼但又觉得对方挺酷',
+  'FUCK+MONK+couple':'🌿 野草生长进了结界，和尚第一次失了定',
+  'SOLO+IMFW+couple':'🦔 长城开了条缝，兰花悄悄把根扎进去了',
+  'DRUNK+DEAD+couple':'🍶 酒鬼闯入死者的通关存档，死者翻了个身',
+  'CTRL+MUM+bestie':'✊ 两个互相兜底的人，这辈子谁也离不开谁',
+  'MUM+IMFW+bestie':'🤱 妈妈遇上兰花，互相养育，这辈子的姐妹',
+  'LOVE-R+THAN-K+bestie':'🌹 两个相信世界是美好的人，是彼此最好的见证',
+  'CTRL+CTRL+bestie':'✊ 两个拿捏者相互制衡，全场最强组合',
+  'SHIT+WOC!+bestie':'💢 一个骂完就冲一个卧槽看穿，毒舌二人组天下无敌',
+};
+
+const COMMENTS={
+  couple:{h:['天作之合，系统认证有效期长期','两个灵魂不约而同走进了同一扇门','化学反应爆炸，不谈恋爱是人类的损失'],
+    m:['磨合期会有点久，但真的值了','互相嫌弃但又离不开，就是这种感觉','我知道你烦，我还是喜欢你'],
+    l:['宇宙级磁场对撞，风险自负','劝合不劝分——但现实可能反着来','你们的故事可以拍成电影，结局留悬念']},
+  bestie:{h:['灵魂共振，这辈子的姐妹','一个眼神就明白对方在想什么','彼此都是对方的情绪充电宝'],
+    m:['合法互相吐槽二十年','对方知道你有多能作，还是没走','高配朋友，偶尔闹但不散'],
+    l:['打过才能是铁杆','相处模式独特，旁人看不懂','交友凭缘分，这两个的缘分比较刁钻']},
+  friend:{h:['朋友圈里的标配，见面就聊得起来','不用刻意维系的那种朋友','能互相记得生日，就够了'],
+    m:['关系还行，偶尔约饭','能说话，但留点距离更舒服','朋友就是：我懂你，但不用天天联系'],
+    l:['走走看，说不准将来','这对组合让旁观者想坐下来看好戏','现在不熟，将来说不定']},
+  mentor:{h:['绝佳师徒缘，一愿教一愿学','这种缘分可遇不可求','未来可能双向成就'],
+    m:['能学到东西，磨合后会有大进步','互相适应后进步很快','有时候学生比老师更清醒'],
+    l:['教学风格差异大，需要耐心','可能是那种多年后才明白老师说对了','现在看不顺眼，将来也许感谢']},
+  family:{h:['家庭氛围稳定，彼此懂得','吃饭不用说话也舒服','能接住对方的崩溃，就是家人'],
+    m:['有小摩擦，但家人就是家人','骨子里离不开','能在同一屋檐下安稳共存'],
+    l:['家人缘分比较特殊，相爱相杀','沉默有时候比争吵更长','但血浓于水']},
+};
+
+function getTitle(t1,t2,mid,sc){
+  const k1=t1.code+'+'+t2.code+'+'+mid;
+  const k2=t2.code+'+'+t1.code+'+'+mid;
+  if(NOTABLE[k1]) return NOTABLE[k1];
+  if(NOTABLE[k2]) return NOTABLE[k2];
+  const r1=ROLES[t1.code]||{v:'遇见了',i:'✨'};
+  const r2=ROLES[t2.code]||{v:'遇见了',i:'✨'};
+  if(sc>=82){
+    const titles={couple:`${r1.i} ${t1.cn}${r1.v}${t2.cn}，天注定的一对`,bestie:`${r1.i} ${t1.cn}和${t2.cn}，这辈子的姐妹`,friend:`${r1.i} ${t1.cn}遇上${t2.cn}，系统认证的朋友`,mentor:`${r1.i} 绝佳师徒缘，${t1.cn}遇上${t2.cn}`,family:`${r1.i} ${t1.cn}和${t2.cn}，家人就是这样的`};
+    return titles[mid]||`${r1.i} ${t1.cn}和${t2.cn}，高配组合`;
+  } else if(sc>=60){
+    return `${r1.i} ${t1.cn}和${t2.cn}，磨合之后会很好`;
+  } else if(sc>=40){
+    return `${r1.i} ${t1.cn}和${t2.cn}，高难度关系但有意思`;
+  }
+  return `${r1.i} ${t1.cn}和${t2.cn}，宇宙级碰撞，风险自负`;
+}
+
+function getNarr(t1,t2,mid,sc){
+  const lv=sc>=75?'h':sc>=50?'m':'l';
+  const pool=COMMENTS[mid][lv];
+  const base=pool[Math.floor(Math.random()*pool.length)];
+  const d1=pdims(t1.p),d2=pdims(t2.p);
+  let extra='';
+  if(mid==='couple'){
+    const e1a=d1[3],e1b=d2[3];
+    if(e1a===3&&e1b===1) extra=`\n\n${t1.cn}的超级稳定感，刚好是${t2.cn}最需要的那块拼图。`;
+    else if(e1a===1&&e1b===3) extra=`\n\n${t2.cn}撑起了整片情感天空，让${t1.cn}终于可以放松。`;
+    else if(d1[4]===3&&d2[4]===3) extra=`\n\n两边都往里全押，感情浓度极高，记得偶尔呼吸。`;
+    else if(d1[4]===1&&d2[4]===1) extra=`\n\n双方都比较克制，感情起来慢，但一旦建立就很扎实。`;
+    else extra=`\n\n这对的能量各有节奏，磨合后会找到属于他们的平衡点。`;
+  } else if(mid==='bestie'){
+    const so=d1[12],sob=d2[12];
+    extra=so===sob?`\n\n两人社交频率相近，在一起不需要调频，自然就聊起来了。`:`\n\n一个主动一个被动，刚好互补，组成完美的社交搭档。`;
+  } else if(mid==='mentor'){
+    extra=d1[9]>d2[9]?`\n\n${t1.cn}的驱动力和方向感，对${t2.cn}是很好的参照系。`:`\n\n有趣的搭配，有时候学生会给老师带来新的视角。`;
+  } else {
+    extra=`\n\n这个组合有自己独特的节奏和化学反应。`;
+  }
+  return base+extra;
+}
+
+function getTags(t1,t2,mid,sc){
+  const tags=[];
+  const d1=pdims(t1.p),d2=pdims(t2.p);
+  if(sc>=80) tags.push({t:'高配对',c:'tg'});
+  else if(sc>=60) tags.push({t:'中配对',c:'tb'});
+  else if(sc>=40) tags.push({t:'低配对',c:'ty'});
+  else tags.push({t:'极限配对',c:'tr'});
+  if(mid==='couple'&&Math.abs(d1[3]-d2[3])>=2) tags.push({t:'依恋互补',c:'tp'});
+  if(mid==='couple'&&Math.abs(d1[5]-d2[5])>=1) tags.push({t:'边界互补',c:'tb'});
+  if(Math.abs(d1[0]-d2[0])===0) tags.push({t:'自信同频',c:'tb'});
+  if(t1.code==='HHHH'||t2.code==='HHHH'||t1.code==='DRUNK'||t2.code==='DRUNK') tags.push({t:'稀有组合',c:'ty'});
+  if(t1.code===t2.code) tags.push({t:'同类相遇',c:'tp'});
+  return tags;
+}
+
+// ─── STATE ───
+let S={my:null,their:null,mode:null};
+
+function goto(pg){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+pg).classList.add('active');
+  window.scrollTo(0,0);
+  if(pg==='my-type') renderGrid('my','');
+  if(pg==='their-type'){renderGrid('their','');renderPreview();}
+  if(pg==='mode'){renderVs();renderModes();}
+}
+
+function restart(){
+  S={my:null,their:null,mode:null};
+  ['btn-my','btn-their','btn-mode'].forEach(id=>document.getElementById(id).disabled=true);
+  document.getElementById('search-my').value='';
+  document.getElementById('search-their').value='';
+  goto('landing');
+}
+
+function renderGrid(w,q=''){
+  const sel=w==='my'?S.my:S.their;
+  const f=q.toLowerCase();
+  const items=TYPES.filter(t=>!f||t.code.toLowerCase().includes(f)||t.cn.includes(f));
+  document.getElementById('grid-'+w).innerHTML=items.map(t=>`
+    <div class="tcard${sel?.code===t.code?' sel':''}" onclick="pick('${w}','${t.code}')">
+      <span class="temi">${t.e}</span>
+      <div class="tcode">${t.code}</div>
+      <div class="tcn">${t.cn}</div>
+    </div>`).join('');
+}
+
+function pick(w,code){
+  const t=TYPES.find(x=>x.code===code);
+  if(w==='my'){S.my=t;document.getElementById('btn-my').disabled=false;}
+  else{S.their=t;document.getElementById('btn-their').disabled=false;}
+  renderGrid(w,document.getElementById('search-'+w).value);
+}
+
+function renderPreview(){
+  if(!S.my) return;
+  const t=S.my;
+  document.getElementById('my-preview').innerHTML=`
+    <span class="prev-emi">${t.e}</span>
+    <div><div class="prev-name">${t.code} · ${t.cn}</div><div class="prev-sub">你的人格</div></div>
+    <span class="prev-badge">✓ 已选</span>`;
+}
+
+function renderVs(){
+  const t1=S.my,t2=S.their;
+  if(!t1||!t2) return;
+  document.getElementById('vs-bar').innerHTML=`
+    <div class="vstype"><span class="vsemi">${t1.e}</span><div class="vscode">${t1.code}</div><div class="vscn">${t1.cn}</div></div>
+    <div class="vsdiv">VS</div>
+    <div class="vstype"><span class="vsemi">${t2.e}</span><div class="vscode">${t2.code}</div><div class="vscn">${t2.cn}</div></div>`;
+}
+
+function renderModes(){
+  document.getElementById('mode-grid').innerHTML=MODES.map(m=>`
+    <div class="mcard${S.mode===m.id?' sel':''}" onclick="pickMode('${m.id}')">
+      <span class="memi">${m.e}</span><div class="mname">${m.n}</div>
+    </div>`).join('');
+}
+
+function pickMode(id){
+  S.mode=id;
+  document.getElementById('btn-mode').disabled=false;
+  renderModes();
+}
+
+function showResult(){
+  goto('result');
+  const t1=S.my,t2=S.their,mid=S.mode;
+  const sc=calc(t1,t2,mid);
+  const title=getTitle(t1,t2,mid,sc);
+  const narr=getNarr(t1,t2,mid,sc);
+  const tags=getTags(t1,t2,mid,sc);
+  const mode=MODES.find(m=>m.id===mid);
+  const d1=pdims(t1.p),d2=pdims(t2.p);
+  const lv=['L','M','H'];
+  const col=sc>=78?'#7BED9F':sc>=55?'#70A1FF':sc>=38?'#FFA502':'#FF4757';
+  const C=2*Math.PI*72;
+
+  const dimHtml=MODELS.map(([mn,start])=>{
+    const rows=[0,1,2].map(di=>{
+      const idx=start+di;
+      const v1=d1[idx],v2=d2[idx];
+      return `<div class="drow">
+        <div class="dname">${DIMS[idx]}</div>
+        <div class="dbars"><div class="dbar d${lv[v1-1]}">${lv[v1-1]}</div></div>
+        <div class="dsep">·</div>
+        <div class="dbars"><div class="dbar d${lv[v2-1]}">${lv[v2-1]}</div></div>
+      </div>`;
+    }).join('');
+    return `<div class="dsec">
+      <div class="dsec-title">${mn}</div>
+      <div class="dlabel"><span>${t1.e} ${t1.code}</span><span></span><span>${t2.e} ${t2.code}</span></div>
+      ${rows}</div>`;
+  }).join('');
+
+  document.getElementById('result-content').innerHTML=`
+    <div class="rtitle">${title}</div>
+    <div class="rsub">${mode.e} ${mode.n}配对 · ${t1.code} × ${t2.code}</div>
+    <div class="score-wrap">
+      <svg class="score-svg" viewBox="0 0 160 160">
+        <circle class="score-bg" cx="80" cy="80" r="72"/>
+        <circle class="score-fg" cx="80" cy="80" r="72" stroke="${col}"
+          stroke-dasharray="${C}" stroke-dashoffset="${C}" id="sfill"/>
+      </svg>
+      <div class="score-txt">
+        <div class="score-num" style="color:${col}" id="snum">0</div>
+        <div class="score-lbl">配对指数</div>
+      </div>
+    </div>
+    <div class="tags">${tags.map(t=>`<span class="tag ${t.c}">${t.t}</span>`).join('')}</div>
+    <div class="narr">${narr.replace(/\n/g,'<br>')}</div>
+    <div style="margin-bottom:8px;font-size:.82rem;font-weight:600;color:var(--muted)">维度对比</div>
+    ${dimHtml}`;
+
+  setTimeout(()=>{
+    const f=document.getElementById('sfill');
+    const n=document.getElementById('snum');
+    if(f) f.style.strokeDashoffset=C*(1-sc/100);
+    let cur=0;
+    const iv=setInterval(()=>{
+      cur=Math.min(cur+2,sc);
+      if(n) n.textContent=cur;
+      if(cur>=sc) clearInterval(iv);
+    },18);
+  },150);
+}
+
+renderGrid('my','');
+</script>
+</body>
+</html>
